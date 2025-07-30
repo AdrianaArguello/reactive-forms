@@ -1,4 +1,13 @@
 import { AbstractControl, FormArray, FormGroup, ValidationErrors } from '@angular/forms';
+
+async function sleep(){
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(true);
+    }, 2500);
+  })
+}
+
 export class FormUtils {
   static namePattern = '([a-zA-Z]+) ([a-zA-Z]+)';
   static emailPattern = '^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$';
@@ -15,6 +24,10 @@ export class FormUtils {
           return `Minimo ${errors['min'].min} caracteres`;
         case 'email':
           return `El valor ingresado no tiene formato de correo`;
+        case 'emailTaken':
+          return `El correo ingresado ya esta registrado`;
+        case 'notStrider':
+          return `No se puede usar ese nombre`;
         case 'pattern':
           if(errors['pattern'].requiredPattern === FormUtils.emailPattern){
             return `El valor ingresado no tiene formato de correo`;
@@ -61,6 +74,20 @@ export class FormUtils {
 
       return field1Value === field2Value ? null : { notEquals: true };
     }
+  }
+
+  //validacion asincrona
+  static async checkingServerResponse(control: AbstractControl): Promise<ValidationErrors | null> {
+    await sleep();
+    const formValue = control.value;
+    if(formValue === 'hola@mundo.com'){
+      return { emailTaken: true };
+    }
+    return null;
+  }
+
+  static notStrider(control: AbstractControl): ValidationErrors | null {
+    return /strider/i.test(control.value) ? { notStrider: true } : null;
   }
 
 }
